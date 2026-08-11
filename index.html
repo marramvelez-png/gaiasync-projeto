@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>GaiaSync - Live</title>
+    <link rel="stylesheet" href="https://unpkg.com" />
+    <script src="https://unpkg.com"></script>
+    <script src="https://socket.io"></script>
+    <style>
+        body, html { margin: 0; padding: 0; height: 100%; background: #0b0f19; font-family: sans-serif; }
+        #map { width: 100%; height: 100vh; position: absolute; z-index: 1; }
+        .panel { position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%); z-index: 1000; background: rgba(15,23,42,0.9); padding: 15px 30px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1); }
+        button { background: #6366f1; color: white; border: none; padding: 12px 24px; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 14px; }
+        button:hover { background: #4f46e5; }
+        .pulse-ring { border: 4px solid #10b981; border-radius: 50%; height: 20px; width: 20px; position: absolute; left: -10px; top: -10px; animation: pulse 2s infinite; }
+        @keyframes pulse { 0% { transform: scale(0.5); opacity: 1; } 100% { transform: scale(4); opacity: 0; } }
+    </style>
+</head>
+<body>
+
+    <div id="map"></div>
+    <div class="panel">
+        <button onclick="entrarNoMapaReal()">🧘 Entrar no Círculo de Meditação Real</button>
+    </div>
+
+    <script>
+        // Inicializa o mapa mundi focado no centro
+        const map = L.map('map', { zoomControl: false }).setView([20, 0], 2);
+        L.tileLayer('https://{s}://{z}/{x}/{y}{r}.png').addTo(map);
+
+        // Enquanto não temos o link do Render, ele tenta conectar localmente
+        const socket = io('http://localhost:3000'); 
+        const marcadoresOnline = {};
+
+        function entrarNoMapaReal() {
+            navigator.geolocation.getCurrentPosition((position) => {
+                const coordenadas = [position.coords.latitude, position.coords.longitude];
+                map.setView(coordenadas, 4); // Foca a câmera na pessoa
+                socket.emit('join-meditation', { coords: coordenadas });
+            }, () => {
+                alert("Por favor, permita o acesso à localização para aparecer no mapa real.");
+            });
+        }
+
+        socket.on('user-joined', (data) => {
+            const icon = L.divIcon({ className: 'custom-marker', html: '<div class="pulse-ring"></div>' });
+            marcadoresOnline[data.id] = L.marker(data.coords, { icon: icon }).addTo(map);
+        });
+
+        socket.on('user-left', (data) => {
+            if (marcadoresOnline[data.id]) {
+                map.removeLayer(marcadoresOnline[data.id]);
+                delete marcadoresOnline[data.id];
+            }
+        });
+    </script>
+</body>
+</html>
