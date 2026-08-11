@@ -29,7 +29,7 @@
         L.tileLayer('https://{s}://{z}/{x}/{y}{r}.png').addTo(map);
 
         // Enquanto não temos o link do Render, ele tenta conectar localmente
-        const socket = io('https://onrender.com');
+        const socket = io('https://gaiasync-projeto.onrender.com');
         const marcadoresOnline = {};
 
         function entrarNoMapaReal() {
