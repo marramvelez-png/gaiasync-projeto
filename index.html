@@ -20,13 +20,15 @@
 
     <div id="map"></div>
     <div class="panel">
-        <button onclick="entrarNoMapaReal()">🧘 Entrar no Círculo de Meditação Real</button>
+    <button onclick="entrarNoMapaReal()">🧘 Entrar no Círculo de Meditação Real</button>
+
+
     </div>
 
     <script>
         // Inicializa o mapa mundi focado no centro
         const map = L.map('map', { zoomControl: false }).setView([20, 0], 2);
-        L.tileLayer('https://{s}://{z}/{x}/{y}{r}.png').addTo(map);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
 
         // Enquanto não temos o link do Render, ele tenta conectar localmente
         const socket = io('https://gaiasync-projeto.onrender.com');
